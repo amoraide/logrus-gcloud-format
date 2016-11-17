@@ -6,7 +6,7 @@ Logrus formatter compatible with Google Cloud's Stackdriver logging agent
 To install formatter, use `go get`:
 
 ```sh
-$ go get github.com/x-cray/logrus-prefixed-formatter
+$ go get github.com/everflow-io/logrus-gcloud-format
 ```
 
 ## Usage
