@@ -1,4 +1,4 @@
-package gcloud_test
+package gcloud
 
 import (
 	"encoding/json"
@@ -6,13 +6,11 @@ import (
 
 	"testing"
 
-	"github.com/Sirupsen/logrus"
-
-	"../log"
+	"github.com/sirupsen/logrus"
 )
 
 func TestErrorNotLost(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("error", errors.New("wild walrus")))
 	if err != nil {
@@ -31,7 +29,7 @@ func TestErrorNotLost(t *testing.T) {
 }
 
 func TestErrorNotLostOnFieldNotNamedError(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("omg", errors.New("wild walrus")))
 	if err != nil {
@@ -50,7 +48,7 @@ func TestErrorNotLostOnFieldNotNamedError(t *testing.T) {
 }
 
 func TestFieldClashWithTime(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("time", "right now!"))
 	if err != nil {
@@ -73,7 +71,7 @@ func TestFieldClashWithTime(t *testing.T) {
 }
 
 func TestFieldClashWithMessage(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("message", "something"))
 	if err != nil {
@@ -92,7 +90,7 @@ func TestFieldClashWithMessage(t *testing.T) {
 }
 
 func TestFieldClashWithSeverity(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("severity", "something"))
 	if err != nil {
@@ -111,7 +109,7 @@ func TestFieldClashWithSeverity(t *testing.T) {
 }
 
 func TestJSONEntryEndsWithNewline(t *testing.T) {
-	formatter := &log.GCloudFormatter{}
+	formatter := &GCloudFormatter{}
 
 	b, err := formatter.Format(logrus.WithField("level", "something"))
 	if err != nil {

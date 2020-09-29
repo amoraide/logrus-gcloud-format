@@ -3,15 +3,36 @@ package gcloud
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
+var (
+	levelMap = map[logrus.Level]string{
+		logrus.TraceLevel: "DEBUG",
+		logrus.DebugLevel: "DEBUG",
+		logrus.InfoLevel:  "INFO",
+		logrus.WarnLevel:  "WARNING",
+		logrus.ErrorLevel: "ERROR",
+		logrus.FatalLevel: "FATAL",
+		logrus.PanicLevel: "ALERT",
+	}
+
+	fieldClashes = []string{
+		"time",
+		"message",
+		"severity",
+	}
+)
+
+// GCloudFormatter is a custom format for GCE
 type GCloudFormatter struct {
 	// TimestampFormat sets the format used for marshaling timestamps.
 	TimestampFormat string
 }
 
+// Format function parses the logrus.Entry for relevant information to be formatted for GCE
 func (f *GCloudFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	data := make(logrus.Fields, len(entry.Data)+3)
 	for k, v := range entry.Data {
@@ -26,14 +47,14 @@ func (f *GCloudFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 	prefixFieldClashes(data)
 
-	timestampFormat := f.TimestampFormat
-	if timestampFormat == "" {
-		timestampFormat = logrus.DefaultTimestampFormat
+	format := time.RFC3339Nano
+	if f.TimestampFormat != "" {
+		format = f.TimestampFormat
 	}
 
-	data["time"] = entry.Time.Format(timestampFormat)
+	data["time"] = entry.Time.Format(format)
 	data["message"] = entry.Message
-	data["severity"] = entry.Level.String()
+	data["severity"] = levelMap[entry.Level]
 
 	serialized, err := json.Marshal(data)
 	if err != nil {
@@ -43,15 +64,9 @@ func (f *GCloudFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 }
 
 func prefixFieldClashes(data logrus.Fields) {
-	if t, ok := data["time"]; ok {
-		data["fields.time"] = t
-	}
-
-	if m, ok := data["message"]; ok {
-		data["fields.message"] = m
-	}
-
-	if l, ok := data["severity"]; ok {
-		data["fields.severity"] = l
+	for _, fc := range fieldClashes {
+		if d, ok := data[fc]; ok {
+			data[fmt.Sprintf("fields.%s", fc)] = d
+		}
 	}
 }
